@@ -39,12 +39,36 @@ function getRandomText(difficultyLevel) {
     return texts[randomIndex];
 }
 
-// Update the sample text
+// Update the sample text and reset highlighting
 function updateSampleText() {
     const selectedDifficulty = difficulty.value;
     const randomText = getRandomText(selectedDifficulty);
     sampleTextDiv.textContent = randomText;
+    highlightSampleText(); // Reset highlighting
 }
+
+// Highlight sample text based on user input
+function highlightSampleText() {
+    const sampleText = sampleTextDiv.textContent;
+    const userText = userInput.value;
+    const sampleWords = sampleText.trim().split(/\s+/);
+    const userWords = userText.trim().split(/\s+/);
+
+    let highlighted = sampleWords.map((word, idx) => {
+        if (userWords[idx] === undefined || userWords[idx] === "") {
+            return `<span>${word}</span>`;
+        } else if (userWords[idx] === word) {
+            return `<span style="color: blue;">${word}</span>`;
+        } else {
+            return `<span style="color: red;">${word}</span>`;
+        }
+    });
+
+    sampleTextDiv.innerHTML = highlighted.join(' ');
+}
+
+// Add event listener for live feedback
+userInput.addEventListener('input', highlightSampleText);
 
 // Count correct words
 function countCorrectWords(userInputText, sampleText) {
@@ -112,6 +136,7 @@ function handleRetryTest() {
 }
 
 // Only one DOMContentLoaded event!
+// Update sample text and highlighting on difficulty change
 document.addEventListener('DOMContentLoaded', () => {
     initializeTestButtons();
     updateSampleText();
