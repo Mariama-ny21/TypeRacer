@@ -17,28 +17,104 @@ const sampleTexts = {
     ]
 };
 
-// Function to get a random text based on difficulty
-function getRandomText(difficulty) {
-    const texts = sampleTexts[difficulty];
+// DOM elements
+const difficulty = document.getElementById('difficultySelect');
+const sampleTextDiv = document.getElementById('sampleText');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const retryBtn = document.getElementById('retryBtn');
+const resultTimeSpan = document.getElementById('resultTime');
+const resultWpmSpan = document.getElementById('resultWpm');
+const resultLevelSpan = document.getElementById('resultLevel');
+const userInput = document.getElementById('userInput');
+
+let startTime = null;
+let endTime = null;
+let timerRunning = false;
+
+// Get a random text based on difficulty
+function getRandomText(difficultyLevel) {
+    const texts = sampleTexts[difficultyLevel];
     const randomIndex = Math.floor(Math.random() * texts.length);
     return texts[randomIndex];
 }
 
-// DOM elements
-const difficultySelect = document.getElementById('difficultySelect');
-const sampleTextDiv = document.getElementById('sampleText');
-
-// Function to update the sample text
+// Update the sample text
 function updateSampleText() {
-    const selectedDifficulty = difficultySelect.value;
+    const selectedDifficulty = difficulty.value;
     const randomText = getRandomText(selectedDifficulty);
     sampleTextDiv.textContent = randomText;
 }
 
-// Set initial sample text on page load
-document.addEventListener('DOMContentLoaded', () => {
-    updateSampleText();
-});
+// Count correct words
+function countCorrectWords(userInputText, sampleText) {
+    const userWords = userInputText.trim().split(/\s+/);
+    const sampleWords = sampleText.trim().split(/\s+/);
+    let correctCount = 0;
+    for (let i = 0; i < Math.min(userWords.length, sampleWords.length); i++) {
+        if (userWords[i] === sampleWords[i]) {
+            correctCount++;
+        }
+    }
+    return correctCount;
+}
 
-// Update sample text when difficulty changes
-difficultySelect.addEventListener('change', updateSampleText);
+// Button initialization and handlers
+function initializeTestButtons() {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    retryBtn.disabled = true;
+    userInput.disabled = true;
+
+    startBtn.addEventListener('click', handleStartTest);
+    stopBtn.addEventListener('click', handleStopTest);
+    retryBtn.addEventListener('click', handleRetryTest);
+}
+
+function handleStartTest() {
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    retryBtn.disabled = true;
+    userInput.value = '';
+    userInput.disabled = false;
+    userInput.focus();
+    startTime = performance.now();
+    endTime = null;
+    timerRunning = true;
+    resultTimeSpan.textContent = '0s';
+    resultWpmSpan.textContent = '0';
+}
+
+function handleStopTest() {
+    if (!timerRunning) return;
+    endTime = performance.now();
+    timerRunning = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    retryBtn.disabled = false;
+    userInput.disabled = true;
+    const elapsedSeconds = ((endTime - startTime) / 1000);
+    resultTimeSpan.textContent = `${elapsedSeconds.toFixed(2)}s`;
+
+    // Calculate WPM
+    const sampleText = sampleTextDiv.textContent;
+    const userText = userInput.value;
+    const correctWords = countCorrectWords(userText, sampleText);
+    const wpm = elapsedSeconds > 0 ? Math.round((correctWords / elapsedSeconds) * 60) : 0;
+    resultWpmSpan.textContent = wpm;
+
+    // Display difficulty level
+    resultLevelSpan.textContent = difficulty.options[difficulty.selectedIndex].text;
+}
+
+function handleRetryTest() {
+    handleStartTest();
+}
+
+// Only one DOMContentLoaded event!
+document.addEventListener('DOMContentLoaded', () => {
+    initializeTestButtons();
+    updateSampleText();
+    // Update sample text when difficulty changes
+    difficulty.addEventListener('change', updateSampleText);
+});
