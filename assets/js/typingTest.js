@@ -21,7 +21,6 @@ const sampleTexts = {
 const difficulty = document.getElementById('difficultySelect');
 const sampleTextDiv = document.getElementById('sampleText');
 const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
 const retryBtn = document.getElementById('retryBtn');
 const resultTimeSpan = document.getElementById('resultTime');
 const resultWpmSpan = document.getElementById('resultWpm');
@@ -31,6 +30,7 @@ const userInput = document.getElementById('userInput');
 let startTime = null;
 let endTime = null;
 let timerRunning = false;
+let currentSampleText = "";
 
 // Get a random text based on difficulty
 function getRandomText(difficultyLevel) {
@@ -43,13 +43,14 @@ function getRandomText(difficultyLevel) {
 function updateSampleText() {
     const selectedDifficulty = difficulty.value;
     const randomText = getRandomText(selectedDifficulty);
+    currentSampleText = randomText;
     sampleTextDiv.textContent = randomText;
-    highlightSampleText(); // Reset highlighting
+    highlightSampleText();
 }
 
 // Highlight sample text based on user input
 function highlightSampleText() {
-    const sampleText = sampleTextDiv.textContent;
+    const sampleText = currentSampleText;
     const userText = userInput.value;
     const sampleWords = sampleText.trim().split(/\s+/);
     const userWords = userText.trim().split(/\s+/);
@@ -67,9 +68,6 @@ function highlightSampleText() {
     sampleTextDiv.innerHTML = highlighted.join(' ');
 }
 
-// Add event listener for live feedback
-userInput.addEventListener('input', highlightSampleText);
-
 // Count correct words
 function countCorrectWords(userInputText, sampleText) {
     const userWords = userInputText.trim().split(/\s+/);
@@ -83,25 +81,29 @@ function countCorrectWords(userInputText, sampleText) {
     return correctCount;
 }
 
-// Button initialization and handlers
+// Initialize the test buttons and their states
 function initializeTestButtons() {
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
+    startBtn.disabled = true; // Start is not used
     retryBtn.disabled = true;
-    userInput.disabled = true;
+    userInput.disabled = false;
 
-    startBtn.addEventListener('click', handleStartTest);
-    stopBtn.addEventListener('click', handleStopTest);
     retryBtn.addEventListener('click', handleRetryTest);
+    userInput.addEventListener('input', handleUserInputStartTest);
+    userInput.addEventListener('input', highlightSampleText);
+    userInput.addEventListener('keydown', handleEnterKeyStopTest);
 }
 
-function handleStartTest() {
+// Start the test when user starts typing
+function handleUserInputStartTest() {
+    if (!timerRunning && userInput.value.trim() !== "") {
+        startTestOnTyping();
+    }
+}
+
+function startTestOnTyping() {
     startBtn.disabled = true;
-    stopBtn.disabled = false;
     retryBtn.disabled = true;
-    userInput.value = '';
     userInput.disabled = false;
-    userInput.focus();
     startTime = performance.now();
     endTime = null;
     timerRunning = true;
@@ -109,21 +111,26 @@ function handleStartTest() {
     resultWpmSpan.textContent = '0';
 }
 
-function handleStopTest() {
+// Stop the test when Enter is pressed
+function handleEnterKeyStopTest(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Prevents new line
+        stopTestOnEnter();
+    }
+}
+
+function stopTestOnEnter() {
     if (!timerRunning) return;
     endTime = performance.now();
     timerRunning = false;
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    retryBtn.disabled = false;
+    retryBtn.disabled = false; // Enable retry after test
     userInput.disabled = true;
     const elapsedSeconds = ((endTime - startTime) / 1000);
     resultTimeSpan.textContent = `${elapsedSeconds.toFixed(2)}s`;
 
     // Calculate WPM
-    const sampleText = sampleTextDiv.textContent;
     const userText = userInput.value;
-    const correctWords = countCorrectWords(userText, sampleText);
+    const correctWords = countCorrectWords(userText, currentSampleText);
     const wpm = elapsedSeconds > 0 ? Math.round((correctWords / elapsedSeconds) * 60) : 0;
     resultWpmSpan.textContent = wpm;
 
@@ -131,15 +138,29 @@ function handleStopTest() {
     resultLevelSpan.textContent = difficulty.options[difficulty.selectedIndex].text;
 }
 
+// Reset everything for a new test and get a new sample sentence of the same difficulty
 function handleRetryTest() {
-    handleStartTest();
+    const selectedDifficulty = difficulty.value;
+    const newSampleText = getRandomText(selectedDifficulty);
+    currentSampleText = newSampleText;
+    sampleTextDiv.textContent = newSampleText;
+    userInput.value = '';
+    userInput.disabled = false;
+    startBtn.disabled = true;
+    retryBtn.disabled = true;
+    timerRunning = false;
+    resultTimeSpan.textContent = '0s';
+    resultWpmSpan.textContent = '0';
+    highlightSampleText();
 }
 
 // Only one DOMContentLoaded event!
-// Update sample text and highlighting on difficulty change
 document.addEventListener('DOMContentLoaded', () => {
     initializeTestButtons();
     updateSampleText();
-    // Update sample text when difficulty changes
-    difficulty.addEventListener('change', updateSampleText);
+    // Update sample text and reset test when difficulty changes
+    difficulty.addEventListener('change', () => {
+        updateSampleText();
+        handleRetryTest();
+    });
 });

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,11 +19,45 @@
     <header class="text-white py-3 mb-4">
         <div class="container d-flex flex-column justify-content-center align-items-center">
             <h1 class="h3 mb-3 text-center">TypeRacer</h1>
-            <button id="instructionsBtn" class="btn btn-light fw-bold">
+            <button id="instructionsBtn" class="btn btn-light fw-bold" data-bs-toggle="modal"
+                data-bs-target="#instructionsModal">
                 <i class="fas fa-info-circle"></i> Instructions
             </button>
         </div>
     </header>
+    <!-- Instructions Modal (moved outside of header/container) -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Use TypeRacer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ol class="mb-3">
+                        <li><strong>Select Difficulty:</strong> Choose Easy, Medium, or Hard from the dropdown
+                            menu.</li>
+                        <li><strong>Start the Test:</strong> Click the <b>Start</b> button. The timer will begin
+                            as soon as you start typing.</li>
+                        <li><strong>Type the Text:</strong> Carefully type the text shown in the box above the
+                            input area. Accuracy matters!</li>
+                        <li><strong>Finish:</strong> Press <kbd>Enter</kbd> to end the
+                            test and see your results.</li>
+                        <li><strong>View Results:</strong> Your level, time taken, and words per minute (WPM)
+                            will be displayed on the right.</li>
+                        <li><strong>Try Again:</strong> Click <b>Retry</b> to reset and improve your score.</li>
+                    </ol>
+                    <p class="mb-0"><strong>Tip:</strong> Focus on accuracy as well as speed for the best
+                        results!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-orange" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL -->
 
     <!-- Main Grid Layout -->
     <main class="container">
@@ -54,12 +88,11 @@
                         <!-- Text box for user input -->
                         <div class="mb-3">
                             <textarea class="form-control" id="userInput" rows="3"
-                                placeholder="Start typing here..."></textarea>
+                                placeholder="Begin typing to start the test. Click Enter to stop the test."></textarea>
                         </div>
                         <!-- Control buttons -->
                         <div class="d-flex gap-2 justify-content-center">
-                            <button type="button" id="startBtn" class="btn btn-outline-orange">Start</button>
-                            <button type="button" id="stopBtn" class="btn btn-outline-orange">Stop</button>
+                            <button type="button" id="startBtn" class="btn btn-outline-orange d-none">Start</button>
                             <button type="button" id="retryBtn" class="btn btn-outline-orange">Retry</button>
                         </div>
                     </div>
@@ -87,22 +120,21 @@
             </div>
         </div>
     </main>
-
-
     <!-- Footer Area -->
     <footer class="text-center text-white py-3 mt-4">
         <div class="container">
             <p class="mb-0">© 2025 TypeRacer. All rights reserved.</p>
         </div>
+    </footer>
 
-        <!--Bootstrap CDN JS Link-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js"
-            integrity="sha384-+qdLa3eD5hO9g6rFS0F2l9FQ774/3B+g1p1p6b5v5U5z5F5v5F5v5F5v5F5v5F5v"
-            crossorigin="anonymous"></script>
-        <!-- Font Awesome CDN Link -->
-        <script src="https://kit.fontawesome.com/ddba35b207.js" crossorigin="anonymous"></script>
-        <!--JavaScript Link-->
-        <script src="assets/js/typingTest.js"></script>
+    <!--Bootstrap CDN JS Bundle (with Popper, required for modals)-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" 
+    crossorigin="anonymous"></script>
+    <!-- Font Awesome CDN Link -->
+    <script src="https://kit.fontawesome.com/ddba35b207.js" crossorigin="anonymous"></script>
+    <!--JavaScript Link-->
+    <script src="assets/js/typingTest.js"></script>
 </body>
 
 </html>
